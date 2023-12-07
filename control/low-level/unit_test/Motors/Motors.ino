@@ -1,14 +1,14 @@
-#define MOTOR0_EN  PA7
-#define MOTOR0_IN1 PB13
-#define MOTOR0_IN2 PB12
+#define MOTOR0_EN  PA3
+#define MOTOR0_IN1 PA4
+#define MOTOR0_IN2 PA5
 
-#define MOTOR1_EN PB0
-#define MOTOR1_IN1 PA6
-#define MOTOR1_IN2 PA4
+#define MOTOR1_EN PA1
+#define MOTOR1_IN1 PA0
+#define MOTOR1_IN2 PA1
 
 void move_forward(int motor_speed);
-void move_backward(int motor_speed)
-void move_clockwise(int motor_speed)
+void move_backward(int motor_speed);
+void move_clockwise(int motor_speed);
 
 
 void setup() {
@@ -26,13 +26,13 @@ void setup() {
 }
 
 void loop() {
-  move_forward();
+  move_forward(65000);
 }
 
 void move_forward(int motor_speed)
 {
-  analogWrite(MOTOR0, motor_speed);
-  analogWrite(MOTOR1, motor_speed);
+  analogWrite(MOTOR0_EN, motor_speed);
+  analogWrite(MOTOR1_EN, motor_speed);
 
   digitalWrite(MOTOR0_IN1, HIGH);
   digitalWrite(MOTOR0_IN2, LOW);
@@ -44,8 +44,8 @@ void move_forward(int motor_speed)
 
 void move_backward(int motor_speed)
 {
-  analogWrite(MOTOR0, motor_speed);
-  analogWrite(MOTOR1, motor_speed);
+  analogWrite(MOTOR0_EN, motor_speed);
+  analogWrite(MOTOR1_EN, motor_speed);
 
   digitalWrite(MOTOR0_IN1, LOW);
   digitalWrite(MOTOR0_IN2, HIGH);
@@ -57,8 +57,8 @@ void move_backward(int motor_speed)
 
 void move_clockwise(int motor_speed)
 {
-  analogWrite(MOTOR0, motor_speed);
-  analogWrite(MOTOR1, motor_speed);
+  analogWrite(MOTOR0_EN, motor_speed);
+  analogWrite(MOTOR1_EN, motor_speed);
 
   digitalWrite(MOTOR0_IN1, LOW);
   digitalWrite(MOTOR0_IN2, HIGH);
