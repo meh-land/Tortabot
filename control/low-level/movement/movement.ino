@@ -29,12 +29,12 @@ void callback_speeds(const std_msgs::Float32MultiArray &speeds_msg)
 
 }
 
-
 ros::NodeHandle nh;  // Initalizing the ROS node
 ros::Publisher Espeed_pub("Espeeds",&Espeed_msg);
 ros::Publisher counts_pub("counts",&counts_msg);
 
-ros::Subscriber<std_msgs::Float32MultiArray> wheel_vel_sub("wheel_vel",&callback_speeds);
+ros::Subscriber<std_msgs::Float32MultiArray> 
+wheel_vel_sub("wheel_vel",&callback_speeds);
 
 
 
@@ -134,7 +134,7 @@ void speedControl()
     digitalWrite(MOTOR0_IN1, LOW);
     digitalWrite(MOTOR0_IN2, HIGH);
   }
-  analogWrite(MOTOR0_EN, abs(constrain(wheel_speeds[0], MIN_VEL, MAX_VEL)));
+  analogWrite(MOTOR0_EN, constrain(abs(wheel_speeds[0]), MIN_VEL, MAX_VEL));
 
 
   // Drive Motor1
@@ -148,7 +148,7 @@ void speedControl()
     digitalWrite(MOTOR1_IN1, LOW);
     digitalWrite(MOTOR1_IN2, HIGH);
   }
-    analogWrite(MOTOR1_EN, abs(constrain(wheel_speeds[1], MIN_VEL, MAX_VEL)));
+    analogWrite(MOTOR1_EN, constrain(abs(wheel_speeds[1]), MIN_VEL, MAX_VEL));
 
   
 }

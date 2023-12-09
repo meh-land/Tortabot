@@ -11,7 +11,7 @@
 #define maxOut 65535
 
 #define MAX_VEL 65535
-#define MIN_VEL 10000
+#define MIN_VEL 0
 #define Kp0 1000
 #define Ki0 2500
 #define Kd0 1
