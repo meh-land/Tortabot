@@ -1,0 +1,12 @@
+<launch>
+
+    <node pkg="rosserial_python" type="serial_node.py" name="serial_node_0">
+      <param name="port" value="/dev/ttyACM0" />
+      <param name="name" value="stm1" />
+    </node>
+
+  
+    <node pkg="manual" type="control_keyboard.py" name="control_keyboard">
+    </node>
+  
+  </launch>
