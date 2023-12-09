@@ -123,6 +123,7 @@ void TimerFunction()
 
 void speedControl()
 {
+  // Drive Motor0
   if (wheel_speeds[0] > 0)
   {
     digitalWrite(MOTOR0_IN1, HIGH);
@@ -133,8 +134,10 @@ void speedControl()
     digitalWrite(MOTOR0_IN1, LOW);
     digitalWrite(MOTOR0_IN2, HIGH);
   }
-  analogWrite(MOTOR0_EN, abs(wheel_speeds[0]));
+  analogWrite(MOTOR0_EN, abs(constrain(wheel_speeds[0], MIN_VEL, MAX_VEL)));
 
+
+  // Drive Motor1
   if (wheel_speeds[1] > 0)
   {
     digitalWrite(MOTOR1_IN1, HIGH);
@@ -145,7 +148,7 @@ void speedControl()
     digitalWrite(MOTOR1_IN1, LOW);
     digitalWrite(MOTOR1_IN2, HIGH);
   }
-    analogWrite(MOTOR1_EN, abs(wheel_speeds[1]));
+    analogWrite(MOTOR1_EN, abs(constrain(wheel_speeds[1], MIN_VEL, MAX_VEL)));
 
   
 }

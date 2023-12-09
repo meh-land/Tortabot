@@ -9,6 +9,9 @@
 #define RESOLUTION 2050
 #define minOut -65535
 #define maxOut 65535
+
+#define MAX_VEL 65535
+#define MIN_VEL 10000
 #define Kp0 1000
 #define Ki0 2500
 #define Kd0 1
@@ -21,12 +24,12 @@
 
 // wheel pins 
 #define MOTOR0_EN  PA3
-#define MOTOR0_IN1 PA4
-#define MOTOR0_IN2 PA5
+#define MOTOR0_IN1 PA5
+#define MOTOR0_IN2 PA4
 
 #define MOTOR1_EN  PA1
-#define MOTOR1_IN1 PA0
-#define MOTOR1_IN2 PA2
+#define MOTOR1_IN1 PA2
+#define MOTOR1_IN2 PA0
 
 #define MOTOR2_EN  PA6
 #define MOTOR2_IN1 PA7
