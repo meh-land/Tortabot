@@ -57,10 +57,10 @@ model_output= numpy.zeros(4)
 
 # You can tune the following constants to your best fit
 # declaring constants of speed in all directions:
-VERTICAL=4.0          #'w','s'
-HORIZONTAL=4.0        #'d','a'
-CLOCKWISE=10       # Q
-ANTICLOCKWISE=10  # E
+VERTICAL=3000.0          #'w','s'
+HORIZONTAL=3000.0        #'d','a'
+CLOCKWISE=3000       # Q
+ANTICLOCKWISE=3000  # E
 
 gain=float(1)# initializing variables
 xlinearVelocity  = 0           # X position represents Forward and Backwards velocity
@@ -70,9 +70,9 @@ angularVelocity = 0
 
 
 
-wheel_vels = numpy.zeros(2)
-MAX_GAIN = 500
-LINEAR_BIAS     = 1000
+wheel_vels = numpy.zeros(4)
+MAX_GAIN = 100000
+LINEAR_BIAS = 1000
 TURN_BIAS = 3000
 
 # function called on press of the key
@@ -96,7 +96,7 @@ def on_press(key):
     robot_vels = np.array([[xlinearVelocity, ylinearVelocity, angularVelocity]])
 
     # Applying kinematic Model to produce velocities on each wheel
-    wheel_vels = Model.kinematicModel(R=WHEEL_RADIUS, b=ROBOT_BASELINE).diff_wheels_inverse(robot_vels)
+    wheel_vels = Model.kinematicModel(R=WHEEL_RADIUS, b=ROBOT_BASELINE).omni4_wheels_inverse(robot_vels)
 
     # publish the results to see speeds
     pub.publish(twist_cmd)
@@ -147,7 +147,7 @@ def on_release(key):
     robot_vels = np.array([[xlinearVelocity, ylinearVelocity, angularVelocity]])
 
     # Applying kinematic Model to produce velocities on each wheel
-    wheel_vels = Model.kinematicModel(R=WHEEL_RADIUS, b=ROBOT_BASELINE).diff_wheels_inverse(robot_vels)
+    wheel_vels = Model.kinematicModel(R=WHEEL_RADIUS, b=ROBOT_BASELINE).omni4_wheels_inverse(robot_vels)
 
     # publish the results to see speed
     pub.publish(twist_cmd)
