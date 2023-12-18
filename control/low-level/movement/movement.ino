@@ -151,57 +151,25 @@ void TimerFunction()
 void speedControl()
 {
   // Drive Motor FL
-  if (wheel_speeds[0] > 0)
-  {
-    digitalWrite(MOTOR_FL_IN1, HIGH);
-    digitalWrite(MOTOR_FL_IN2, LOW);
-  }
-  else
-  {
-    digitalWrite(MOTOR_FL_IN1, LOW);
-    digitalWrite(MOTOR_FL_IN2, HIGH);
-  }
+  digitalWrite(MOTOR_FL_IN1, wheel_speeds[0] > 0);
+  digitalWrite(MOTOR_FL_IN2, wheel_speeds[0] < 0);
   analogWrite(MOTOR_FL_EN, constrain(abs(wheel_speeds[0]), MIN_VEL, MAX_VEL));
 
 
   // Drive Motor FR
-  if (wheel_speeds[1] > 0)
-  {
-    digitalWrite(MOTOR_FR_IN1, HIGH);
-    digitalWrite(MOTOR_FR_IN2, LOW);
-  }
-  else
-  {
-    digitalWrite(MOTOR_FR_IN1, LOW);
-    digitalWrite(MOTOR_FR_IN2, HIGH);
-  }
+  digitalWrite(MOTOR_FR_IN1, wheel_speeds[1] > 0);
+  digitalWrite(MOTOR_FR_IN2, wheel_speeds[1] < 0);
   analogWrite(MOTOR_FR_EN, constrain(abs(wheel_speeds[1]), MIN_VEL, MAX_VEL));
 
-    // Drive Motor BL
-  if (wheel_speeds[2] > 0)
-  {
-    digitalWrite(MOTOR_BL_IN1, HIGH);
-    digitalWrite(MOTOR_BL_IN2, LOW);
-  }
-  else
-  {
-    digitalWrite(MOTOR_BL_IN1, LOW);
-    digitalWrite(MOTOR_BL_IN2, HIGH);
-  }
+  // Drive Motor BL
+  digitalWrite(MOTOR_BL_IN1, wheel_speeds[2] > 0);
+  digitalWrite(MOTOR_BL_IN2, wheel_speeds[2] < 0);
   analogWrite(MOTOR_BL_EN, constrain(abs(wheel_speeds[2]), MIN_VEL, MAX_VEL));
 
 
   // Drive Motor BR
-  if (wheel_speeds[3] > 0)
-  {
-    digitalWrite(MOTOR_BR_IN1, HIGH);
-    digitalWrite(MOTOR_BR_IN2, LOW);
-  }
-  else
-  {
-    digitalWrite(MOTOR_BR_IN1, LOW);
-    digitalWrite(MOTOR_BR_IN2, HIGH);
-  }
+  digitalWrite(MOTOR_BR_IN1, wheel_speeds[3] > 0);
+  digitalWrite(MOTOR_BR_IN2, wheel_speeds[3] < 0);
   analogWrite(MOTOR_BR_EN, constrain(abs(wheel_speeds[3]), MIN_VEL, MAX_VEL));
 
 }
