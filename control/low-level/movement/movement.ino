@@ -22,10 +22,10 @@ ISR_Encoder MOTOR_Encoder[] {ISR_Encoder(RESOLUTION,ENCODER_FL_A, ENCODER_FL_B),
                              };
 
 PIDControl PID_Controller[] {
-                              PIDControl(kp_init,ki_init,kd_init,1/TIME_FREQ),
-                              PIDControl(kp_init,ki_init,kd_init,1/TIME_FREQ),
-                              PIDControl(kp_init,ki_init,kd_init,1/TIME_FREQ),
-                              PIDControl(kp_init,ki_init,kd_init,1/TIME_FREQ)
+                              PIDControl(kp_init,ki_init,kd_init,1.0f/TIME_FREQ),
+                              PIDControl(kp_init,ki_init,kd_init,1.0f/TIME_FREQ),
+                              PIDControl(kp_init,ki_init,kd_init,1.0f/TIME_FREQ),
+                              PIDControl(kp_init,ki_init,kd_init,1.0f/TIME_FREQ)
                               };
 float wheel_speeds [] = {0, 0, 0, 0};
 long wheel_pwm [] = {0,0,0,0};
