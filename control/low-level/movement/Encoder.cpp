@@ -19,7 +19,7 @@ float Encoder::calcspeed(){
   float dt=current_time- prevtime;
 
         /*calc speed*/
-  wheel_speed=(MINUTE_TO_SECOND*MS_TO_S/resolution)*(dp/dt);//in RPM,{speed=dp/dt in counts/ms}
+  wheel_speed=(MS_TO_S/resolution)*(dp/dt);//in RPS,{speed=dp/dt in counts/ms}
 
     //update postition
   prevcount=counts;
