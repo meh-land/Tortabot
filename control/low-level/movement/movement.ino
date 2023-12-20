@@ -46,7 +46,10 @@ void callback_speeds(const std_msgs::Float32MultiArray &speeds_msg)
   PID_Controller[1].set_setpoint(wheel_speeds[1]);
   PID_Controller[2].set_setpoint(wheel_speeds[2]);
   PID_Controller[3].set_setpoint(wheel_speeds[3]);
+  
 
+  String debug_str = "Got Speeds: " + String(wheel_speeds[0])+ " "+ String(wheel_speeds[1])+ " "+ String(wheel_speeds[2])+ " "+ String(wheel_speeds[3]);
+  nh.loginfo(&debug_str[0]);
 }
 
 void callback_pid(const std_msgs::Float32MultiArray &pid_msg)
