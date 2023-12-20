@@ -2,7 +2,7 @@
 #define PINCONFIG_H
 
 
-#define DEAD_ZONE 2
+#define DEAD_ZONE 0.1
 #define numberOfVelocities 4
 #define sampleTime 0.03 //millisecond
 #define TIME_FREQ 50
@@ -12,9 +12,9 @@
 
 #define MAX_VEL 65535
 #define MIN_VEL 0
-#define kp_init 1000
-#define ki_init 2500
-#define kd_init 1
+#define kp_init 30000
+#define ki_init 30000
+#define kd_init 10
 
 
 
