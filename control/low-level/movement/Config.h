@@ -12,9 +12,9 @@
 
 #define MAX_VEL 65535
 #define MIN_VEL 0
-#define Kp 1000
-#define Ki 2500
-#define Kd 1
+#define kp_init 1000
+#define ki_init 2500
+#define kd_init 1
 
 
 
