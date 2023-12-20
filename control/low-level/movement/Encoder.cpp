@@ -2,6 +2,8 @@
 
 #define MINUTE_TO_SECOND 60
 #define MS_TO_S          1000
+#define RPS_TO_RAD (2.0f*PI)
+
  
 Encoder::Encoder(float resolution){
   counts=0;
@@ -19,7 +21,7 @@ float Encoder::calcspeed(){
   float dt=current_time- prevtime;
 
         /*calc speed*/
-  wheel_speed=(MS_TO_S/resolution)*(dp/dt);//in RPS,{speed=dp/dt in counts/ms}
+  wheel_speed=(MS_TO_S/resolution)*(dp/dt)*RPS_TO_RAD;//in Rad,{speed=dp/dt in counts/ms}
 
     //update postition
   prevcount=counts;
