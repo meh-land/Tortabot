@@ -8,6 +8,7 @@
 #include "Encoder.h"
 #include "Config.h"
 #include "ISR_Encoder.h"
+#include "PID.h"
 
 
 void speedControl();
@@ -19,10 +20,18 @@ ISR_Encoder MOTOR_Encoder[] {ISR_Encoder(RESOLUTION,ENCODER_FL_A, ENCODER_FL_B),
                              ISR_Encoder(RESOLUTION,ENCODER_BR_A, ENCODER_BR_B)
                              };
 
-long wheel_speeds [] = {0, 0, 0, 0};
-
+PIDControl PID_Controller[] {
+                              PIDControl(0,0,0,1/TIME_FREQ),
+                              PIDControl(0,0,0,1/TIME_FREQ),
+                              PIDControl(0,0,0,1/TIME_FREQ),
+                              PIDControl(0,0,0,1/TIME_FREQ)
+                              };
+float wheel_speeds [] = {0, 0, 0, 0};
+long wheel_pwm [] = {0,0,0,0};
 //Timer2 timer;
 std_msgs::Float32MultiArray Espeed_msg;
+std_msgs::Int32MultiArray pwm_msg;
+std_msgs::Float32MultiArray pid_consts;
 std_msgs::Int32MultiArray counts_msg;
 
 void callback_speeds(const std_msgs::Float32MultiArray &speeds_msg)
@@ -31,15 +40,38 @@ void callback_speeds(const std_msgs::Float32MultiArray &speeds_msg)
   wheel_speeds[1] = speeds_msg.data[1];
   wheel_speeds[2] = speeds_msg.data[2];
   wheel_speeds[3] = speeds_msg.data[3];
+
+  PID_Controller[0].set_setpoint(wheel_speeds[0]);
+  PID_Controller[1].set_setpoint(wheel_speeds[1]);
+  PID_Controller[2].set_setpoint(wheel_speeds[2]);
+  PID_Controller[3].set_setpoint(wheel_speeds[3]);
+
 }
+
+void callback_pid(const std_msgs::Float32MultiArray &pid_msg)
+{
+  float kp = pid_msg.data[0];
+  float ki = pid_msg.data[1];
+  float kd = pid_msg.data[2];
+
+  PID_Controller[0].set_parameters(kp,ki,kd);
+  PID_Controller[1].set_parameters(kp,ki,kd);
+  PID_Controller[2].set_parameters(kp,ki,kd);
+  PID_Controller[3].set_parameters(kp,ki,kd);
+
+}
+
 
 ros::NodeHandle nh;  // Initalizing the ROS node
 ros::Publisher Espeed_pub("Espeeds",&Espeed_msg);
 ros::Publisher counts_pub("counts",&counts_msg);
+ros::Publisher pwm_pub("pwm",&pwm_msg);
 
 ros::Subscriber<std_msgs::Float32MultiArray> 
 wheel_vel_sub("wheel_vel",&callback_speeds);
 
+ros::Subscriber<std_msgs::Float32MultiArray> 
+pid_consts_sub("PID_CONST",&callback_pid);
 
 
 
@@ -84,8 +116,10 @@ void setup()
   nh.initNode();
   nh.advertise(Espeed_pub);
   nh.advertise(counts_pub);
+  nh.advertise(pwm_pub);
   
   nh.subscribe(wheel_vel_sub);
+  nh.subscribe(pid_consts_sub);
 
 
   //*********************** Attaching intterupts to the encoder pins ********************************//
@@ -141,36 +175,49 @@ void TimerFunction()
   counts_msg.data_length= 4;
   counts_msg.data= encoder_counts;
 
+  PID_control();
+  
+  pwm_msg.data_length = 4;
+  pwm_msg.data = wheel_pwm;
+  
   speedControl();
   
   Espeed_pub.publish(&Espeed_msg);
   counts_pub.publish(&counts_msg);
+  pwm_pub.publish(&pwm_msg);
 }
 
+void PID_control()
+{
+  wheel_pwm[0] = PID_Controller[0].calculateOutput(wheel_speeds[0]);
+  wheel_pwm[1] = PID_Controller[1].calculateOutput(wheel_speeds[1]);
+  wheel_pwm[2] = PID_Controller[2].calculateOutput(wheel_speeds[2]);
+  wheel_pwm[3] = PID_Controller[3].calculateOutput(wheel_speeds[3]);
+}
 
 void speedControl()
 {
   // Drive Motor FL
-  digitalWrite(MOTOR_FL_IN1, wheel_speeds[0] > 0);
-  digitalWrite(MOTOR_FL_IN2, wheel_speeds[0] < 0);
-  analogWrite(MOTOR_FL_EN, constrain(abs(wheel_speeds[0]), MIN_VEL, MAX_VEL));
+  digitalWrite(MOTOR_FL_IN1, wheel_pwm[0] > 0);
+  digitalWrite(MOTOR_FL_IN2, wheel_pwm[0] < 0);
+  analogWrite(MOTOR_FL_EN, constrain(abs(wheel_pwm[0]), MIN_VEL, MAX_VEL));
 
 
   // Drive Motor FR
-  digitalWrite(MOTOR_FR_IN1, wheel_speeds[1] > 0);
-  digitalWrite(MOTOR_FR_IN2, wheel_speeds[1] < 0);
-  analogWrite(MOTOR_FR_EN, constrain(abs(wheel_speeds[1]), MIN_VEL, MAX_VEL));
+  digitalWrite(MOTOR_FR_IN1, wheel_pwm[1] > 0);
+  digitalWrite(MOTOR_FR_IN2, wheel_pwm[1] < 0);
+  analogWrite(MOTOR_FR_EN, constrain(abs(wheel_pwm[1]), MIN_VEL, MAX_VEL));
 
   // Drive Motor BL
-  digitalWrite(MOTOR_BL_IN1, wheel_speeds[2] > 0);
-  digitalWrite(MOTOR_BL_IN2, wheel_speeds[2] < 0);
-  analogWrite(MOTOR_BL_EN, constrain(abs(wheel_speeds[2]), MIN_VEL, MAX_VEL));
+  digitalWrite(MOTOR_BL_IN1, wheel_pwm[2] > 0);
+  digitalWrite(MOTOR_BL_IN2, wheel_pwm[2] < 0);
+  analogWrite(MOTOR_BL_EN, constrain(abs(wheel_pwm[2]), MIN_VEL, MAX_VEL));
 
 
   // Drive Motor BR
-  digitalWrite(MOTOR_BR_IN1, wheel_speeds[3] > 0);
-  digitalWrite(MOTOR_BR_IN2, wheel_speeds[3] < 0);
-  analogWrite(MOTOR_BR_EN, constrain(abs(wheel_speeds[3]), MIN_VEL, MAX_VEL));
+  digitalWrite(MOTOR_BR_IN1, wheel_pwm[3] > 0);
+  digitalWrite(MOTOR_BR_IN2, wheel_pwm[3] < 0);
+  analogWrite(MOTOR_BR_EN, constrain(abs(wheel_pwm[3]), MIN_VEL, MAX_VEL));
 
 }
 

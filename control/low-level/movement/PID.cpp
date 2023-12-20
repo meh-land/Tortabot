@@ -33,11 +33,11 @@ float  PIDControl::calculateOutput(float feedBack)
         output = Kp * error + integralTerm +  derivativeTerm; 
         previous_error = error; 
     //}
-    if ((abs(setpoint-feedBack)<DEAD_ZONE)&& (0 == setpoint))
+    /*if ((abs(setpoint-feedBack)<DEAD_ZONE)&& (0 == setpoint))
     {
       output = 0;
       integralTerm = 0;
-    }
+    }*/
     return output;
       
 }
