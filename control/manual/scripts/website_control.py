@@ -2,7 +2,7 @@
 
 import rospy
 from geometry_msgs.msg import Twist
-from pynput import keyboard
+
 import numpy
 import math
 import Model
