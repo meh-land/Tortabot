@@ -7,13 +7,13 @@ class kinematicModel:
         self.R = R
         self.b = b
 
-        self.omni4_kinematics = np.array([
-            [R/2,  R/2, R/2, R/2],
-            [R/2, -R/2, -R/2, R/2],
-            [R/(2*b), -R/(2*b),R/(2*b), -R/(2*b)]
+        self.mecanum4_kinematics = np.array([
+            [R/4,  R/4, R/4, R/4],
+            [R/4, -R/4, -R/4, R/4],
+            [R/(4*b), -R/(4*b),R/(4*b), -R/(4*b)]
         ])
 
-        self.inv_kinematics = np.linalg.pinv(self.omni4_kinematics)
+        self.inv_kinematics = np.linalg.pinv(self.mecanum4_kinematics)
 
 
     
@@ -21,7 +21,7 @@ class kinematicModel:
         pass
 
 
-    def omni4_wheels_inverse(self, robot_vels):
+    def mecanum4_wheels_inverse(self, robot_vels):
         return self.inv_kinematics @ robot_vels.T
 
 

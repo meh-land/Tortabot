@@ -13,8 +13,8 @@ import numpy as np
 # a set of strings of all currently-pressed keys
 pressed_keys = set()
 
-WHEEL_RADIUS = 0.03    # 3cm
-ROBOT_BASELINE = 0.3   # 30cm
+WHEEL_RADIUS = 0.04    # 4cm
+ROBOT_BASELINE = 0.3+0.12   # 30+12cm
 '''
 MANUAL USAGE to control the robot.
 
@@ -147,7 +147,7 @@ def on_release(key):
     robot_vels = np.array([[xlinearVelocity, ylinearVelocity, angularVelocity]])
 
     # Applying kinematic Model to produce velocities on each wheel
-    wheel_vels = Model.kinematicModel(R=WHEEL_RADIUS, b=ROBOT_BASELINE).omni4_wheels_inverse(robot_vels)
+    wheel_vels = Model.kinematicModel(R=WHEEL_RADIUS, b=ROBOT_BASELINE).mecanum4_wheels_inverse(robot_vels)
 
     # publish the results to see speed
     pub.publish(twist_cmd)
