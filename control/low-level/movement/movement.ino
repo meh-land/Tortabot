@@ -10,6 +10,7 @@
 #include "ISR_Encoder.h"
 #include "PID.h"
 
+ros::NodeHandle nh;  // Initalizing the ROS node
 
 void speedControl();
 
@@ -21,10 +22,10 @@ ISR_Encoder MOTOR_Encoder[] {ISR_Encoder(RESOLUTION,ENCODER_FL_A, ENCODER_FL_B),
                              };
 
 PIDControl PID_Controller[] {
-                              PIDControl(0,0,0,1/TIME_FREQ),
-                              PIDControl(0,0,0,1/TIME_FREQ),
-                              PIDControl(0,0,0,1/TIME_FREQ),
-                              PIDControl(0,0,0,1/TIME_FREQ)
+                              PIDControl(kp,ki,kd,1/TIME_FREQ),
+                              PIDControl(kp,ki,kd,1/TIME_FREQ),
+                              PIDControl(kp,ki,kd,1/TIME_FREQ),
+                              PIDControl(kp,ki,kd,1/TIME_FREQ)
                               };
 float wheel_speeds [] = {0, 0, 0, 0};
 long wheel_pwm [] = {0,0,0,0};
@@ -59,10 +60,11 @@ void callback_pid(const std_msgs::Float32MultiArray &pid_msg)
   PID_Controller[2].set_parameters(kp,ki,kd);
   PID_Controller[3].set_parameters(kp,ki,kd);
 
+  String debug_str = "Got PID: " + String(kp)+ " " + String(ki) +" " + String(kd);
+  nh.loginfo(&debug_str[0]);
 }
 
 
-ros::NodeHandle nh;  // Initalizing the ROS node
 ros::Publisher Espeed_pub("Espeeds",&Espeed_msg);
 ros::Publisher counts_pub("counts",&counts_msg);
 ros::Publisher pwm_pub("pwm",&pwm_msg);
