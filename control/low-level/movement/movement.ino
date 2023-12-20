@@ -191,10 +191,10 @@ void TimerFunction()
 
 void PID_control()
 {
-  wheel_pwm[0] = PID_Controller[0].calculateOutput(wheel_speeds[0]);
-  wheel_pwm[1] = PID_Controller[1].calculateOutput(wheel_speeds[1]);
-  wheel_pwm[2] = PID_Controller[2].calculateOutput(wheel_speeds[2]);
-  wheel_pwm[3] = PID_Controller[3].calculateOutput(wheel_speeds[3]);
+  wheel_pwm[0] = PID_Controller[0].calculateOutput(encoder_feedback[0]);
+  wheel_pwm[1] = PID_Controller[1].calculateOutput(encoder_feedback[1]);
+  wheel_pwm[2] = PID_Controller[2].calculateOutput(encoder_feedback[2]);
+  wheel_pwm[3] = PID_Controller[3].calculateOutput(encoder_feedback[3]);
 }
 
 void speedControl()
