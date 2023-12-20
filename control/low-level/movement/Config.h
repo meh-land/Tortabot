@@ -2,7 +2,7 @@
 #define PINCONFIG_H
 
 
-#define DEAD_ZONE 0.1
+#define DEAD_ZONE 0.3
 #define numberOfVelocities 4
 #define sampleTime 0.03 //millisecond
 #define TIME_FREQ 50
