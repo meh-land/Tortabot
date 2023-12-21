@@ -64,8 +64,8 @@ ylinearVelocity  = 0
 maxAngularVelocity = 0.585     # radian per second
 angularVelocity = 0
 wheel_radius = 0.04 #0.075 
-lx = 0.15#22  #horizontal distance from the center of the robot
-ly = 0.15#15.8  #vertical distance from the center of the robot
+lx = 0.15        #22  #horizontal distance from the center of the robot
+ly = 0.15       #15.8  #vertical distance from the center of the robot
 model_output= np.zeros(4)
 MAX_GAIN = 3
 
