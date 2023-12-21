@@ -10,7 +10,7 @@
 class Encoder{
  
   public:
-    long encodercount; ///<encoder counts
+    long counts; ///<encoder counts
 
   /**
    * @param resolution the resolution of the encoder

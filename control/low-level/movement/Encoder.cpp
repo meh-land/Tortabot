@@ -1,6 +1,6 @@
 #include "Encoder.h"
 Encoder::Encoder(float resolution){
-  encodercount=0;
+  counts=0;
   prevcount=0;
   prevtime=0;
   this->resolution=resolution;
@@ -10,7 +10,7 @@ Encoder::Encoder(float resolution){
 float Encoder::calcspeed(){
   
   float current_time=millis();
-  long newcount=encodercount;
+  long newcount=counts;
   int dp=newcount-prevcount;
   float dt=current_time- prevtime;
 
@@ -18,7 +18,7 @@ float Encoder::calcspeed(){
   Espeed=(60*1000/resolution)*(dp/dt);//in RPM,{speed=dp/dt in counts/ms}
 
     //update postition
-  prevcount=encodercount;
+  prevcount=counts;
 
     //update time
   prevtime=current_time;

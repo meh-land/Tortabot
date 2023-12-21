@@ -17,21 +17,21 @@ void ISR_Encoder::update_ISR_B(void)
 {
     if (digitalRead(PinA) != digitalRead(PinB))
     {
-        encodercount++;
+        counts++;
     }
     else
     {
-        encodercount--;
+        counts--;
     }
 }
 void ISR_Encoder::update_ISR_A(void)
 {
     if (digitalRead(PinA) == digitalRead(PinB))
     {
-        encodercount++;
+        counts++;
     }
     else
     {
-        encodercount--;
+        counts--;
     }
 }
