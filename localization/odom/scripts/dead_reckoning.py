@@ -22,6 +22,7 @@ class ForwardKinematics:
                                     [0 , 0 , 1]])
         map_reference_matrix = np.matmul(rotational_matrix,  input)
         return map_reference_matrix
+        
 class Mecanum(ForwardKinematics):
     def __init__(self, lx, ly, wheel_radius):
         constant = wheel_radius / 4
