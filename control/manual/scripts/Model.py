@@ -1,33 +1,28 @@
 import numpy as np
 
 class kinematicModel:
-    def __init__ (self, R = 0, b = 0):
+    def __init__ (self, Vx, Vy, W, wheel_radius = 0, lx = 0, ly = 0):
         
-
-        self.R = R
-        self.b = b
-
-        self.mecanum4_kinematics = np.array([
-            [R/4,  R/4, R/4, R/4],
-            [R/4, -R/4, -R/4, R/4],
-            [R/(4*b), -R/(4*b),R/(4*b), -R/(4*b)]
-        ])
-
-        self.inv_kinematics = np.linalg.pinv(self.mecanum4_kinematics)
-
-
+        self.Vx = Vx
+        self.Vy = Vy
+        self.W = W
+        self.wheel_radius = wheel_radius
+        self.lx = lx
+        self.ly = ly
     
-    def diff_wheels_forward(self, wheel_vels):
-        pass
+    def mecanum_4_vel(self):
+        
+        scalar = 1/self.wheel_radius
+        
+        sum = self.lx + self.ly
 
+        fixed_array = np.array([[1, -1, -sum],
+                                [1,  1,  sum],
+                                [1,  1, -sum],
+                                [1, -1,  sum]])
+        
+        input_array = np.array([self.Vx, self.Vy, self.W])
 
-    def mecanum4_wheels_inverse(self, robot_vels):
-        return self.inv_kinematics @ robot_vels.T
+        outside_matrix = np.matmul(scalar * fixed_array, input_array)
 
-
-   
-    
-if __name__ == '__main__':
-    model = kinematicModel(R=0.06, b=0.3)
-    robot_vel = np.array([[10,0,0]])
-    print(model.diff_wheels_inverse(robot_vels=robot_vel))
+        return outside_matrix

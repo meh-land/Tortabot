@@ -1,0 +1,23 @@
+<!-- Shato.launch -->
+<launch>
+
+  <!-- Launch Dead_reckoning script-->
+  <node name="dead_reck" pkg="dead_reckoning" type="dead_reckoning_script.py" output="screen">
+    
+  </node>
+  <!-- Launch Keyboard script-->
+  <!-- <node name="Key_board" pkg="control" type="control-keyboard.py" output="screen">
+
+  </node>  -->
+
+  <!-- Launch Phone imu script  -->
+  <!-- <node name="phone_imu" pkg="dead_reckoning" type="phone_imu_driver.py" output="screen">
+    
+  </node> -->
+
+  <!-- Launch Rosserial_arduino script  -->
+  <node name="rosserial_arduino_node" pkg="rosserial_arduino" type="serial_node.py" output="screen">
+    <param name="port" value="/dev/ttyACM0"/>
+  </node>
+
+</launch>

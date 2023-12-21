@@ -7,12 +7,10 @@
  * @brief This class is parent for encoder interfacing
  * 
 */
-
-
 class Encoder{
  
   public:
-    long counts; ///<encoder counts
+    long encodercount; ///<encoder counts
 
   /**
    * @param resolution the resolution of the encoder
@@ -33,9 +31,9 @@ class Encoder{
 
   private :
   
-     int prevcount = 0;          ///<previous counts of the encoder
-     float prevtime;             ///<previous time of the calculation
-     float wheel_speed = 0 ;     ///<speed of the motor
-     float  resolution = 0;      ///<the resolution of the encoder
+     int prevcount = 0;     ///<previous counts of the encoder
+     float prevtime;        ///<previous time of the calculation
+     float Espeed = 0 ;     ///<speed of the motor
+     float  resolution = 0; ///<the resolution of the encoder
 };
 #endif

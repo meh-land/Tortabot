@@ -38,7 +38,6 @@ float  PIDControl::calculateOutput(float feedBack)
       output = 0;
       integralTerm = 0;
     }
-    
     return output;
       
 }

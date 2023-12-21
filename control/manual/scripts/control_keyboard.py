@@ -1,26 +1,21 @@
 #!/usr/bin/env python3
-
 import rospy
 from geometry_msgs.msg import Twist
 from pynput import keyboard
-import numpy
+import numpy as np
 import math
 import Model
 from std_msgs.msg import Float32MultiArray
 
-import numpy as np
-
 # a set of strings of all currently-pressed keys
 pressed_keys = set()
 
-WHEEL_RADIUS = 0.04    # 4cm
-ROBOT_BASELINE = 0.3+0.12   # 30+12cm
 '''
 MANUAL USAGE to control the robot.
 
 for movement:
         W -> Forward
-    A   S   D -q> Right
+    A   S   D -> Right
     |    \ 
     v     v
    Left  Backward
@@ -37,7 +32,7 @@ Press ESC to turn off the program
 # initializing rospy nodes and topics' publisher
 rospy.init_node('keyboard_robot_control', anonymous=True)
 pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
-angular_publisher = rospy.Publisher('/wheel_vel', Float32MultiArray, queue_size=10)
+angular_publisher = rospy.Publisher('/wheel_velocities', Float32MultiArray, queue_size=10)
 rate = rospy.Rate(10)  # 10 Hz
 
 # this array will be used to send the kinematic's model data to the robot STM
@@ -51,34 +46,36 @@ xlinearVelocity  = 0.0           # X position represents Forward and Backwards v
 ylinearVelocity  = 0.0         
 maxAngularVelocity = 0.585     # radian per second
 angularVelocity = 0.0
-
-
-model_output= numpy.zeros(4)
+wheel_radius = 0.04 #0.075 
+lx = 0.15#22  #horizontal distance from the center of the robot
+ly = 0.15#15.8  #vertical distance from the center of the robot
+model_output= np.zeros(4)
 
 # You can tune the following constants to your best fit
 # declaring constants of speed in all directions:
-VERTICAL=3000.0          #'w','s'
-HORIZONTAL=3000.0        #'d','a'
-CLOCKWISE=3000       # Q
-ANTICLOCKWISE=3000  # E
+VERTICAL=0.2531        #'w','s'
+HORIZONTAL=0.2531        #'d','a'
+CLOCKWISE=0.4       # E
+ANTICLOCKWISE=-0.4  # Q
 
 gain=float(1)# initializing variables
 xlinearVelocity  = 0           # X position represents Forward and Backwards velocity
 ylinearVelocity  = 0         
 maxAngularVelocity = 0.585     # radian per second
 angularVelocity = 0
+wheel_radius = 0.04 #0.075 
+lx = 0.15#22  #horizontal distance from the center of the robot
+ly = 0.15#15.8  #vertical distance from the center of the robot
+model_output= np.zeros(4)
+MAX_GAIN = 3
 
-
-
-wheel_vels = numpy.zeros(4)
-MAX_GAIN = 100000
-LINEAR_BIAS = 1000
-TURN_BIAS = 3000
+def rad_per_sec_to_rpm(speeds):
+    return speeds * 60 / (2 * np.pi)
 
 # function called on press of the key
 def on_press(key):
     #globalizing variables
-    global xlinearVelocity, ylinearVelocity, angularVelocity,wheel_vels, gain, pressed_keys
+    global xlinearVelocity, ylinearVelocity, angularVelocity,model_output, lx, ly, gain, pressed_keys
     # add the currently pressed key
     # if it's alphanumeric:
     if hasattr(key, 'char'):
@@ -92,22 +89,18 @@ def on_press(key):
     twist_cmd.linear.x = xlinearVelocity  
     twist_cmd.linear.y = ylinearVelocity
     twist_cmd.angular.z = angularVelocity
-    
-    robot_vels = np.array([[xlinearVelocity, ylinearVelocity, angularVelocity]])
-
     # Applying kinematic Model to produce velocities on each wheel
-    wheel_vels = Model.kinematicModel(R=WHEEL_RADIUS, b=ROBOT_BASELINE).omni4_wheels_inverse(robot_vels)
-
+    model_output = Model.kinematicModel(xlinearVelocity, ylinearVelocity, angularVelocity, wheel_radius, lx, ly).mecanum_4_vel()
+    model_output = rad_per_sec_to_rpm(model_output)
     # publish the results to see speeds
     pub.publish(twist_cmd)
-    arr.data = wheel_vels
-
+    arr.data = model_output
     # publish the model data to the robot
     angular_publisher.publish(arr)
 
 # function called on release of key 
 def on_release(key):
-    global xlinearVelocity, ylinearVelocity, angularVelocity,wheel_vels,  gain, pressed_keys
+    global xlinearVelocity, ylinearVelocity, angularVelocity,model_output, lx, ly, gain, pressed_keys
     # remove the key released
     if hasattr(key, 'char'): #alphanumeric character
         try:
@@ -144,15 +137,11 @@ def on_release(key):
     twist_cmd.linear.x = xlinearVelocity 
     twist_cmd.linear.y = ylinearVelocity
     twist_cmd.angular.z = angularVelocity
-    robot_vels = np.array([[xlinearVelocity, ylinearVelocity, angularVelocity]])
-
     # Applying kinematic Model to produce velocities on each wheel
-    wheel_vels = Model.kinematicModel(R=WHEEL_RADIUS, b=ROBOT_BASELINE).mecanum4_wheels_inverse(robot_vels)
-
+    model_output = Model.kinematicModel(xlinearVelocity, ylinearVelocity, angularVelocity, wheel_radius, lx, ly).mecanum_4_vel()
     # publish the results to see speed
     pub.publish(twist_cmd)
-    arr.data = wheel_vels
-
+    arr.data = model_output
     # publish the model data to the robot
     angular_publisher.publish(arr)
 
@@ -162,45 +151,38 @@ def seeKeyboard():
     xlinear=0
     ylinear=0
     angular=0
-
     if 'Key.esc' in pressed_keys:
-        exit()
-
+        exit() # Exit the program when ESC pressed
     if 'Key.shift' in pressed_keys:
-        if (gain + 10 <= float(MAX_GAIN)): # limit the speed gain = MAX_GAIN
-            gain += 10 
-
+        if (gain + 0.1 <= float(MAX_GAIN)): # limit the speed gain = MAX_GAIN
+            gain += 0.1
     if 'Key.ctrl' in pressed_keys:
-        if (gain-10 >= 0): # limit = zero
-            gain -= 10
-
-
-
-    if 'd' in pressed_keys:
+        if (gain-0.05>=0): # limit = zero
+            gain -= 0.05
+    if 'a' in pressed_keys:
         #ylinearVelocity=VERTICAL*gain
-        ylinear+=VERTICAL*gain + LINEAR_BIAS
+        ylinear+=VERTICAL*gain
 
     if 'w' in pressed_keys:
         #xlinearVelocity=HORIZONTAL*gain
-        xlinear+=HORIZONTAL*gain + LINEAR_BIAS
+        xlinear+=HORIZONTAL*gain
 
 
-    if 'a' in pressed_keys:
+    if 'd' in pressed_keys:
         #ylinearVelocity=-VERTICAL*gain
-        ylinear-=VERTICAL*gain + LINEAR_BIAS
+        ylinear-=VERTICAL*gain
 
     if 's' in pressed_keys:
         #xlinearVelocity=-HORIZONTAL*gain
-        xlinear-=HORIZONTAL*gain + LINEAR_BIAS
-
-    if 'q' in pressed_keys:
-        #angularVelocity=ANTICLOCKWISE*gain
-        angular-=ANTICLOCKWISE*gain + TURN_BIAS
+        xlinear-=HORIZONTAL*gain
 
     if 'e' in pressed_keys:
-        #angularVelocity=CLOCKWISE*gain
-        angular+=CLOCKWISE*gain + TURN_BIAS
+        #angularVelocity=ANTICLOCKWISE*gain
+        angular+=ANTICLOCKWISE*gain
 
+    if 'q' in pressed_keys:
+        #angularVelocity=CLOCKWISE*gain
+        angular+=CLOCKWISE*gain
     angularVelocity=angular
     xlinearVelocity=xlinear
     ylinearVelocity=ylinear

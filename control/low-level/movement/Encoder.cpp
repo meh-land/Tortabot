@@ -1,12 +1,6 @@
 #include "Encoder.h"
-
-#define MINUTE_TO_SECOND 60
-#define MS_TO_S          1000
-#define RPS_TO_RAD (2.0f*PI)
-
- 
 Encoder::Encoder(float resolution){
-  counts=0;
+  encodercount=0;
   prevcount=0;
   prevtime=0;
   this->resolution=resolution;
@@ -16,19 +10,19 @@ Encoder::Encoder(float resolution){
 float Encoder::calcspeed(){
   
   float current_time=millis();
-  long  newcount=counts;
-  int   dp=newcount-prevcount;
+  long newcount=encodercount;
+  int dp=newcount-prevcount;
   float dt=current_time- prevtime;
 
         /*calc speed*/
-  wheel_speed=(MS_TO_S/resolution)*(dp/dt)*RPS_TO_RAD;//in Rad,{speed=dp/dt in counts/ms}
+  Espeed=(60*1000/resolution)*(dp/dt);//in RPM,{speed=dp/dt in counts/ms}
 
     //update postition
-  prevcount=counts;
+  prevcount=encodercount;
 
     //update time
   prevtime=current_time;
 
-  return wheel_speed;
+  return Espeed;
  
 }

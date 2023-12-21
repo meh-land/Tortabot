@@ -1,10 +1,10 @@
 #define MOTOR0_EN  PA3
-#define MOTOR0_IN1 PA4
-#define MOTOR0_IN2 PA5
+#define MOTOR0_IN1 PA5
+#define MOTOR0_IN2 PA4
 
 #define MOTOR1_EN PA1
-#define MOTOR1_IN1 PA0
-#define MOTOR1_IN2 PA1
+#define MOTOR1_IN1 PA2
+#define MOTOR1_IN2 PA0
 
 void move_forward(int motor_speed);
 void move_backward(int motor_speed);
@@ -26,7 +26,7 @@ void setup() {
 }
 
 void loop() {
-  move_forward(65000);
+  move_backward(60000);
 }
 
 void move_forward(int motor_speed)
