@@ -1,0 +1,16 @@
+<launch>
+
+  
+    <node pkg="gui" type="first_ros.py" name="dear_gui">
+    </node>
+  
+
+    <node pkg="manual" type="control_keyboard.py" name="keyboard_events">
+    </node>
+  
+
+    <node pkg="manual" type="control_transfer.py" name="control_Mecanum">
+    </node>
+
+    
+  </launch>
