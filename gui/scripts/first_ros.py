@@ -1,6 +1,9 @@
+#!/usr/bin/env python3
+
 import rospy
 from std_msgs.msg import String
 from std_msgs.msg import Int16
+from std_msgs.msg import Float32MultiArray
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Image
@@ -24,6 +27,20 @@ from subprocess import Popen
 dpg.create_context()
 
 
+PLOT_BUFFER = 1000
+
+motor0_x = [0]
+motor0_y = [0]
+
+motor1_x = [0]
+motor1_y = [0]
+
+motor2_x = [0]
+motor2_y = [0]
+
+motor3_x = [0]
+motor3_y = [0]
+
 out_x = [0]
 out_y = [0]
 in_x = [0]
@@ -37,6 +54,8 @@ PUB_SIMPLE = "dearpy_simple_pub"
 PUB_CMD    = "cmd_vel"
 
 SUB_COUNTER = "dearpy_counter"
+SUB_ENCODER = "Espeeds"
+SUB_KEY = "key_vel"
 SUB_ODOM = "odom"
 SUB_LEFT_RAW = "/tortabot/camera/left/image_raw"
 SUB_RIGHT_RAW = "/tortabot/camera/right/image_raw"
@@ -53,13 +72,51 @@ bag_process = ''
 
 
 #  ROS
-def get_counter(msg):
-    counter_sub_data = dpg.set_value(item="Counter_Sub", value=f"{msg.data}")
-    out_x.append(out_x[-1]+1)
-    out_y.append(msg.data)
-    in_x.append(in_x[-1]+1)
-    in_y.append(in_x[-1]+1)
+# def get_counter(msg):
+#     counter_sub_data = dpg.set_value(item="Counter_Sub", value=f"{msg.data}")
+#     out_x.append(out_x[-1]+1)
+#     out_y.append(msg.data)
+#     in_x.append(in_x[-1]+1)
+#     in_y.append(in_x[-1]+1)
+#     update_series()
+
+def get_encoders(msg):
+    encoders = np.array(msg.data)
+    
+    if len(motor0_x)>=PLOT_BUFFER:
+        motor0_x.pop(0)
+        motor0_y.pop(0)
+    motor0_x.append(motor0_x[-1]+1)
+    motor0_y.append(encoders[0])
+
+    if len(motor1_x)>=PLOT_BUFFER:
+        motor1_x.pop(0)
+        motor1_y.pop(0)
+    motor1_x.append(motor1_x[-1]+1)
+    motor1_y.append(encoders[1])
+
+    if len(motor2_x)>=PLOT_BUFFER:
+        motor2_x.pop(0)
+        motor2_y.pop(0)
+    motor2_x.append(motor2_x[-1]+1)
+    motor2_y.append(encoders[2])
+
+    if len(motor3_x)>=PLOT_BUFFER:
+        motor3_x.pop(0)
+        motor3_y.pop(0)
+    motor3_x.append(motor3_x[-1]+1)
+    motor3_y.append(encoders[3])
+
+    
+
     update_series()
+
+
+def get_keyboard(msg):
+    if dpg.get_value(item='keyboard_checkbox'):
+        pub_cmd.publish(msg)
+    else:
+        logger.log_info(f"The Keyboard checkbox is disabled")
 
 def get_odom(msg):
     x = msg.pose.pose.position.x
@@ -115,7 +172,9 @@ rospy.init_node("Dearpy_Node")
 pub_simple = rospy.Publisher(PUB_SIMPLE, String, queue_size=2)
 pub_cmd    = rospy.Publisher(PUB_CMD, Twist, queue_size=2)
 
-rospy.Subscriber(SUB_COUNTER, Int16,  get_counter)
+# rospy.Subscriber(SUB_COUNTER, Int16,  get_counter)
+rospy.Subscriber(SUB_ENCODER, Float32MultiArray,  get_encoders)
+rospy.Subscriber(SUB_KEY, Twist,  get_keyboard)
 rospy.Subscriber(SUB_ODOM, Odometry,  get_odom)
 rospy.Subscriber(SUB_LEFT_RAW, Image,  get_left_stream, queue_size=1)
 rospy.Subscriber(SUB_RIGHT_RAW, Image,  get_right_stream, queue_size=1)
@@ -142,6 +201,18 @@ def check_joy():
     print("Here")
 
 
+def text_cmd_callback(sender, app_data, user_data):
+    cmd_speeds = Twist()
+    cmd_speeds.linear.x = float(dpg.get_value(item='linear_x_text'))
+    cmd_speeds.linear.y = float(dpg.get_value(item='linear_y_text'))
+    cmd_speeds.angular.z = float(dpg.get_value(item='angular_z_text'))
+
+    pub_cmd.publish(cmd_speeds)
+    logger.log_info(message=f"Publish {cmd_speeds.linear.x}, {cmd_speeds.linear.y}, {cmd_speeds.angular.z}")
+
+
+
+
 def manual_control(sender, app_data, user_data):
     '''
     This Function for Take Manual control from GUI
@@ -162,6 +233,7 @@ def manual_control(sender, app_data, user_data):
         logger.log_info(message=f"Published {speed} UP")
         cmd_speeds.linear.x = speed
 
+
     elif user_data=='DOWN':
         pub_simple.publish(f"DOWN Speed {speed}")
         logger.log_info(message=f"Published {speed} DOWN")
@@ -172,15 +244,24 @@ def manual_control(sender, app_data, user_data):
     elif user_data=='LEFT':
         pub_simple.publish(f"LEFT Speed {speed}")
         logger.log_info(message=f"Published {speed} LEFT")
-        cmd_speeds.angular.z = -speed
+        cmd_speeds.linear.y = speed
 
 
 
     elif user_data=='RIGHT':
         pub_simple.publish(f"RIGHT Speed {speed}")
         logger.log_info(message=f"Published {speed} RIGHT")
-        cmd_speeds.angular.z = speed
+        cmd_speeds.linear.y = -speed
 
+    elif user_data=='A':
+        pub_simple.publish(f"Anti-clockwise Speed {speed}")
+        logger.log_info(message=f"Published {speed} Anti-clockwise")
+        cmd_speeds.angular.z = speed
+    
+    elif user_data=='C':
+        pub_simple.publish(f"clockwise Speed {speed}")
+        logger.log_info(message=f"Published {speed} clockwise")
+        cmd_speeds.angular.z = -speed
 
     if speed > 5:
         logger.log_warning(f"Speed is {speed}")
@@ -213,11 +294,17 @@ def record_bag(sender, app_data, user_data):
 
 
 def update_series():
-    dpg.set_value('series_tag_output', [out_x, out_y])
-    dpg.set_item_label('series_tag_output', "Output")
+    dpg.set_value('motor0_plot', [motor0_x,motor0_y])
+    dpg.set_item_label('motor0_plot', "Motor_FL")
 
-    dpg.set_value('series_tag_input', [in_x, in_y])
-    dpg.set_item_label('series_tag_input', "Input")
+    dpg.set_value('motor1_plot', [motor1_x, motor1_y])
+    dpg.set_item_label('motor1_plot', "Motor_FR")
+
+    dpg.set_value('motor2_plot', [motor2_x,motor2_y])
+    dpg.set_item_label('motor2_plot', "Motor_BL")
+
+    dpg.set_value('motor3_plot', [motor3_x, motor3_y])
+    dpg.set_item_label('motor3_plot', "Motor_BR")
 
     dpg.fit_axis_data('x_axis')
     dpg.fit_axis_data('y_axis') 
@@ -244,7 +331,7 @@ def keyboard_handlers(sender, app_data):
 # add a font registry
 with dpg.font_registry():
     # first argument ids the path to the .ttf or .otf file
-    default_font = dpg.add_font("dearpy-ros/assets/Fonts/Retron2000.ttf", 30)
+    default_font = dpg.add_font("/home/abbas/ROS1/Torta_ws/src/Tortabot/gui/scripts/assets/Fonts/Retron2000.ttf", 30)
 
 with dpg.theme(tag="button_theme"):
     with dpg.theme_component(dpg.mvButton):
@@ -381,31 +468,50 @@ with dpg.window(label="Control_Panel", height=900, width=600, pos=CONTORL_PANEL_
 
 
     with dpg.collapsing_header(label="Manual Control"):
-        with dpg.group(horizontal=True):
+        with dpg.group(horizontal=True, indent=150):
             dpg.add_checkbox(label="Keyboard" ,callback=check_keyboard, tag='keyboard_checkbox')
             dpg.add_checkbox(label="Joy" , callback=check_joy, tag='joy_checkbox')
 
-
-        with dpg.group(horizontal=True, indent=200):
-            dpg.add_button(label="UP", callback=manual_control,width=100,indent=20, arrow=True, direction=dpg.mvDir_Up,user_data='UP',tag='up_button') # default direction is mvDir_Up
-
-        with dpg.group(horizontal=True, indent=130):
-            dpg.add_button(label="LEFT", callback=manual_control, arrow=True, user_data='LEFT' , direction=dpg.mvDir_Left, tag="left_button")
-            dpg.add_button(label="STOP", callback=manual_control, user_data='STOP', tag='stop_button')
-            dpg.add_button(label="RIGHT", callback=manual_control, arrow=True, user_data='RIGHT', direction=dpg.mvDir_Right, tag="right_button")
-
-        with dpg.group(horizontal=True,  indent=200):
-            dpg.add_button(label="DOWN", callback=manual_control,indent=20, arrow=True, user_data='DOWN' ,direction=dpg.mvDir_Down, tag="down_button") # default direction is mvDir_Up
+        with dpg.collapsing_header(label="Buttons Control", indent=30):
+            with dpg.group(horizontal=True, indent=150):
+                dpg.add_button(label="A", callback=manual_control,user_data='A',tag='anti_button') # default direction is mvDir_Up
+                dpg.add_button(label="UP", callback=manual_control, arrow=True, direction=dpg.mvDir_Up,user_data='UP',tag='up_button') # default direction is mvDir_Up
+                dpg.add_button(label="C", callback=manual_control, user_data='C',tag='clock_button') # default direction is mvDir_Up
 
 
+            with dpg.group(horizontal=True, indent=130):
+                dpg.add_button(label="LEFT", callback=manual_control, arrow=True, user_data='LEFT' , direction=dpg.mvDir_Left, tag="left_button")
+                dpg.add_button(label="STOP", callback=manual_control, user_data='STOP', tag='stop_button')
+                dpg.add_button(label="RIGHT", callback=manual_control, arrow=True, user_data='RIGHT', direction=dpg.mvDir_Right, tag="right_button")
+
+            with dpg.group(horizontal=True,  indent=200):
+                dpg.add_button(label="DOWN", callback=manual_control,indent=20, arrow=True, user_data='DOWN' ,direction=dpg.mvDir_Down, tag="down_button") # default direction is mvDir_Up
+
+            dpg.add_slider_float(label="Speed", default_value=0.05, max_value=2, tag='Manual_Speed', indent=30)
+
+
+        
+        # dpg.add_slider_float(label="Turn", default_value=0.1, max_value=10, tag='Manual_Speed')
+
+
+        with dpg.collapsing_header(label="Text Control", indent=30):
+            with dpg.group(indent=70):
+                dpg.add_input_text(label="x", default_value="0", tag='linear_x_text')
+                dpg.add_input_text(label="y", default_value="0", tag='linear_y_text')
+                dpg.add_input_text(label="t", default_value="0", tag='angular_z_text')
+                dpg.add_button(label="Publish Speeds", indent=50,callback=text_cmd_callback, tag='pub_speed')
+        
         dpg.bind_item_theme(item='stop_button', theme="button_theme")
         dpg.bind_item_theme(item='right_button', theme="button_theme")
         dpg.bind_item_theme(item='left_button', theme="button_theme")
         dpg.bind_item_theme(item='up_button', theme="button_theme")
         dpg.bind_item_theme(item='down_button', theme="button_theme")
-        dpg.add_slider_float(label="Speed", default_value=0.1, max_value=10, tag='Manual_Speed')
-        # dpg.add_slider_float(label="Turn", default_value=0.1, max_value=10, tag='Manual_Speed')
+        dpg.bind_item_theme(item='anti_button', theme="button_theme")
+        dpg.bind_item_theme(item='clock_button', theme="button_theme")
+        dpg.bind_item_theme(item='pub_speed', theme="button_theme")
 
+        
+        
         with dpg.handler_registry():
             dpg.add_key_press_handler( callback=get_key)
 
@@ -458,19 +564,29 @@ with dpg.window(label="Control_Panel", height=900, width=600, pos=CONTORL_PANEL_
 
             # series belong to a y axis. Note the tag name is used in the update
             # function update_data
-            dpg.add_line_series(x=list(out_x),y=list(out_y), 
-                                label='Counter_Output', parent='y_axis', 
-                                tag='series_tag_output')
+            dpg.add_line_series(x=list(motor0_x),y=list(motor0_y), 
+                                label='motor0', parent='y_axis', 
+                                tag='motor0_plot')
             
-            dpg.add_line_series(x=list(in_x),y=list(in_y), 
-                                label='Counter_Intput', parent='y_axis', 
-                                tag='series_tag_input')
+            dpg.add_line_series(x=list(motor1_y),y=list(motor1_y), 
+                                label='motor1', parent='y_axis', 
+                                tag='motor1_plot')
+            
+            dpg.add_line_series(x=list(motor2_x),y=list(motor2_y), 
+                                label='motor2', parent='y_axis', 
+                                tag='motor2_plot')
+            
+            dpg.add_line_series(x=list(motor3_y),y=list(motor3_y), 
+                                label='motor3', parent='y_axis', 
+                                tag='motor3_plot')
             
 
 
             # apply theme to series
-            dpg.bind_item_theme("series_tag_output", "plot_theme_blue")
-            dpg.bind_item_theme("series_tag_input", "plot_theme_red")
+            dpg.bind_item_theme("motor0_plot", "plot_theme_blue")
+            dpg.bind_item_theme("motor1_plot", "plot_theme_red")
+            dpg.bind_item_theme("motor2_plot", "plot_theme_green")
+            dpg.bind_item_theme("motor3_plot", "plot_theme_yellow")
 
 
 
@@ -500,7 +616,7 @@ with dpg.window(label="Control_Panel", height=900, width=600, pos=CONTORL_PANEL_
     #     listener.join()
 
 
-dpg.create_viewport(title='ROS App', width=1900, height=1400, small_icon=r'dearpy-ros/assets/icons/robot.png', large_icon=r'dearpy-ros/assets/icons/robot.ico')
+dpg.create_viewport(title='ROS App', width=1900, height=1400, small_icon=r'/home/abbas/ROS1/Torta_ws/src/Tortabot/gui/scripts/assets/icons/robot.png', large_icon=r'/home/abbas/ROS1/Torta_ws/src/Tortabot/gui/scripts/assets/icons/robot.ico')
 dpg.setup_dearpygui()
 dpg.show_viewport()
 dpg.start_dearpygui()
