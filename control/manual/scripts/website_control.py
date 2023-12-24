@@ -62,7 +62,7 @@ def twist_callback(msg):
     robot_vels = np.array([[linear_x, linear_y, angular_z]])
 
     # Applying kinematic Model to produce velocities on each wheel
-    wheel_vels = Model.kinematicModel(R=WHEEL_RADIUS, b=ROBOT_BASELINE).mecanum4_wheels_inverse(robot_vels)
+    wheel_vels = Model.kinematicModel(linear_x, linear_y, angular_z, lx=.15, ly=.36).mecanum_4_vel()
 
     # publish the results to see speeds
     arr.data = wheel_vels

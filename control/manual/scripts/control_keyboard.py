@@ -31,8 +31,8 @@ Press ESC to turn off the program
 
 # initializing rospy nodes and topics' publisher
 rospy.init_node('keyboard_robot_control', anonymous=True)
-pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
-angular_publisher = rospy.Publisher('/wheel_velocities', Float32MultiArray, queue_size=10)
+pub = rospy.Publisher('/key_vel', Twist, queue_size=10)
+# angular_publisher = rospy.Publisher('/wheel_vel', Float32MultiArray, queue_size=10)
 rate = rospy.Rate(10)  # 10 Hz
 
 # this array will be used to send the kinematic's model data to the robot STM
@@ -41,15 +41,7 @@ arr = Float32MultiArray()
 # twist_cmd is storing x,y,z linear and angular velocities 
 twist_cmd = Twist()
 
-# initializing speed and kinematic model variables
-xlinearVelocity  = 0.0           # X position represents Forward and Backwards velocity
-ylinearVelocity  = 0.0         
-maxAngularVelocity = 0.585     # radian per second
-angularVelocity = 0.0
-wheel_radius = 0.04 #0.075 
-lx = 0.15#22  #horizontal distance from the center of the robot
-ly = 0.15#15.8  #vertical distance from the center of the robot
-model_output= np.zeros(4)
+
 
 # You can tune the following constants to your best fit
 # declaring constants of speed in all directions:
@@ -64,8 +56,8 @@ ylinearVelocity  = 0
 maxAngularVelocity = 0.585     # radian per second
 angularVelocity = 0
 wheel_radius = 0.04 #0.075 
-lx = 0.15        #22  #horizontal distance from the center of the robot
-ly = 0.15       #15.8  #vertical distance from the center of the robot
+lx = 0.15#22  #horizontal distance from the center of the robot
+ly = 0.36#15.8  #vertical distance from the center of the robot
 model_output= np.zeros(4)
 MAX_GAIN = 3
 
@@ -85,18 +77,15 @@ def on_press(key):
         pressed_keys.add(str(key)) ## for example: shift will be 'Key.shift'
     
     seeKeyboard() # check the pressed keys
+
     # store the x,y,z of linear velocity and angular velocity
-    twist_cmd.linear.x = xlinearVelocity  
+    twist_cmd.linear.x = xlinearVelocity 
     twist_cmd.linear.y = ylinearVelocity
     twist_cmd.angular.z = angularVelocity
-    # Applying kinematic Model to produce velocities on each wheel
-    model_output = Model.kinematicModel(xlinearVelocity, ylinearVelocity, angularVelocity, wheel_radius, lx, ly).mecanum_4_vel()
-    model_output = rad_per_sec_to_rpm(model_output)
+    
     # publish the results to see speeds
     pub.publish(twist_cmd)
-    arr.data = model_output
-    # publish the model data to the robot
-    angular_publisher.publish(arr)
+  
 
 # function called on release of key 
 def on_release(key):
@@ -137,13 +126,10 @@ def on_release(key):
     twist_cmd.linear.x = xlinearVelocity 
     twist_cmd.linear.y = ylinearVelocity
     twist_cmd.angular.z = angularVelocity
-    # Applying kinematic Model to produce velocities on each wheel
-    model_output = Model.kinematicModel(xlinearVelocity, ylinearVelocity, angularVelocity, wheel_radius, lx, ly).mecanum_4_vel()
+
     # publish the results to see speed
     pub.publish(twist_cmd)
-    arr.data = model_output
-    # publish the model data to the robot
-    angular_publisher.publish(arr)
+
 
 # function checks for pressed keys
 def seeKeyboard():
@@ -183,6 +169,7 @@ def seeKeyboard():
     if 'q' in pressed_keys:
         #angularVelocity=CLOCKWISE*gain
         angular+=CLOCKWISE*gain
+
     angularVelocity=angular
     xlinearVelocity=xlinear
     ylinearVelocity=ylinear

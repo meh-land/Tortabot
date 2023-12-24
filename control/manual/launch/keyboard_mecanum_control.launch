@@ -1,0 +1,12 @@
+<launch>
+
+  
+    <node pkg="manual" type="control_keyboard.py" name="control_keyboard">
+    </node>
+  
+
+    <node pkg="manual" type="control_transfer.py" name="control_Mecanum">
+    </node>
+
+    
+  </launch>
