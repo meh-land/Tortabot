@@ -1,0 +1,24 @@
+<launch>
+
+    <node pkg="rosserial_python" type="serial_node.py" name="serial_node_0">
+      <param name="port" value="/dev/ttyACM0" />
+      <param name="name" value="stm1" />
+    </node>
+
+  
+    <node pkg="odom" type="dead_reckoning_script.py" name="odom_script">
+    </node>
+
+   
+
+
+    <node pkg="gui" type="first_ros.py" name="control_gui">
+    </node>
+
+    <node pkg="manual" type="control_keyboard.py" name="keyboard_events">
+    </node>
+  
+    <node pkg="manual" type="control_transfer.py" name="control_Mecanum">
+    </node>
+    
+  </launch>
