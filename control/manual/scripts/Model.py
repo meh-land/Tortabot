@@ -12,7 +12,7 @@ class kinematicModel:
     
     def mecanum_4_vel(self):
         
-        scalar = 1/self.wheel_radius
+        # scalar = 1/self.wheel_radius
         
         sum = self.lx + self.ly
 
