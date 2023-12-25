@@ -3,10 +3,10 @@
 import rospy
 from std_msgs.msg import String
 from std_msgs.msg import Int16
-from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Float32MultiArray, Int16MultiArray
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage
 import ros_numpy
 
 
@@ -46,18 +46,24 @@ out_y = [0]
 in_x = [0]
 in_y = [0]
 
+
+gripper_angle = 90
+base_angle = 90
+
 # DIR
 BAGS = "dearpy-ros/bags"
 
 # TOPICS
 PUB_SIMPLE = "dearpy_simple_pub"
+PUB_ARM = "arm_joints"
 PUB_CMD    = "cmd_vel"
 
 SUB_COUNTER = "dearpy_counter"
 SUB_ENCODER = "Espeeds"
 SUB_KEY = "key_vel"
+SUB_MOB = "mob_vel"
 SUB_ODOM = "odom"
-SUB_LEFT_RAW = "/tortabot/camera/left/image_raw"
+SUB_LEFT_RAW = "/camera/image/compressed"
 SUB_RIGHT_RAW = "/tortabot/camera/right/image_raw"
 
 
@@ -115,8 +121,12 @@ def get_encoders(msg):
 def get_keyboard(msg):
     if dpg.get_value(item='keyboard_checkbox'):
         pub_cmd.publish(msg)
-    else:
-        logger.log_info(f"The Keyboard checkbox is disabled")
+
+
+def get_mob(msg):
+    if dpg.get_value(item='mob_checkbox'):
+        pub_cmd.publish(msg)
+
 
 def get_odom(msg):
     x = msg.pose.pose.position.x
@@ -134,9 +144,16 @@ def get_left_stream(msg):
     start = time.time()
 
     # left_img = []
-    left_stream = ros_numpy.numpify(msg)
+    # left_stream = ros_numpy.numpify(msg)
+    np_arr = np.frombuffer(msg.data, np.uint8)
+        
+    left_stream = cv2.imdecode(np_arr, cv2.IMREAD_COLOR) 
+
     rgba = cv2.cvtColor(left_stream, cv2.COLOR_RGB2RGBA)
-    rgba[:,:,3] = 255 
+    rgba = left_stream
+
+    # rgba[:,:,3] = 255 
+    print(rgba.shape)
     left_stream = cv2.resize(rgba, (640,350))/255.0
     left_stream = list(left_stream.reshape(-1))
 
@@ -149,6 +166,7 @@ def get_left_stream(msg):
 
     end = time.time()
 
+    logger.log_info("Get stream")
     dpg.set_value("camera_left_stream", left_stream)
 
 def get_right_stream(msg):
@@ -157,7 +175,7 @@ def get_right_stream(msg):
     # right_img = []
     right_stream = ros_numpy.numpify(msg)
     rgba = cv2.cvtColor(right_stream, cv2.COLOR_RGB2RGBA)
-    rgba[:,:,3] = 255 
+    # rgba[:,:,3] = 255 
     right_stream = cv2.resize(rgba, (640,350))/255.0
     right_stream = list(right_stream.reshape(-1))
     
@@ -170,14 +188,16 @@ def get_right_stream(msg):
 
 rospy.init_node("Dearpy_Node")
 pub_simple = rospy.Publisher(PUB_SIMPLE, String, queue_size=2)
+pub_arm = rospy.Publisher(PUB_ARM, Int16MultiArray, queue_size=1)
 pub_cmd    = rospy.Publisher(PUB_CMD, Twist, queue_size=2)
 
 # rospy.Subscriber(SUB_COUNTER, Int16,  get_counter)
 rospy.Subscriber(SUB_ENCODER, Float32MultiArray,  get_encoders)
 rospy.Subscriber(SUB_KEY, Twist,  get_keyboard)
+rospy.Subscriber(SUB_MOB, Twist,  get_mob)
 rospy.Subscriber(SUB_ODOM, Odometry,  get_odom)
-rospy.Subscriber(SUB_LEFT_RAW, Image,  get_left_stream, queue_size=1)
-rospy.Subscriber(SUB_RIGHT_RAW, Image,  get_right_stream, queue_size=1)
+rospy.Subscriber(SUB_LEFT_RAW, CompressedImage,  get_left_stream, queue_size=5)
+rospy.Subscriber(SUB_RIGHT_RAW, CompressedImage,  get_right_stream, queue_size=5)
 
 
 #  INTERFACE
@@ -210,6 +230,28 @@ def text_cmd_callback(sender, app_data, user_data):
     pub_cmd.publish(cmd_speeds)
     logger.log_info(message=f"Publish {cmd_speeds.linear.x}, {cmd_speeds.linear.y}, {cmd_speeds.angular.z}")
 
+
+def base_joint_callback():
+    global base_angle
+    
+    base_angle = int(dpg.get_value(item='base_angle'))
+    
+    publish_arm()
+
+
+def gripper_joint_callback():
+    global  gripper_angle
+
+    gripper_angle = int(dpg.get_value(item='gripper_angle'))
+    time.sleep(0.1)
+    publish_arm()
+
+def publish_arm():
+    global base_angle, gripper_angle, pub_arm
+    arm_angles = [base_angle, gripper_angle]
+
+
+    pub_arm.publish(Int16MultiArray(data=arm_angles))
 
 
 
@@ -440,6 +482,15 @@ with dpg.window(label="Control_Panel", height=900, width=600, pos=CONTORL_PANEL_
             dpg.add_text("Subscriber: ")
             counter_sub_data = dpg.add_text(tag='Counter_Sub', default_value="0" ,)
 
+    with dpg.collapsing_header(label="Robot Arm"):
+        '''
+        Publisher
+        '''
+        dpg.add_slider_float(label="base", default_value=90, max_value=180, tag='base_angle', indent=30, callback=base_joint_callback)
+        dpg.add_slider_float(label="gripper", default_value=90, max_value=180, tag='gripper_angle', indent=30, callback=gripper_joint_callback)
+        dpg.add_button(label="ARM PUB", callback=publish_arm,user_data='ARM',tag='arm_button', indent=200) # default direction is mvDir_Up
+        dpg.bind_item_theme(item='arm_button', theme="button_theme")
+
 
     with dpg.collapsing_header(label="State of Robot"):
 
@@ -470,7 +521,7 @@ with dpg.window(label="Control_Panel", height=900, width=600, pos=CONTORL_PANEL_
     with dpg.collapsing_header(label="Manual Control"):
         with dpg.group(horizontal=True, indent=150):
             dpg.add_checkbox(label="Keyboard" ,callback=check_keyboard, tag='keyboard_checkbox')
-            dpg.add_checkbox(label="Joy" , callback=check_joy, tag='joy_checkbox')
+            dpg.add_checkbox(label="Mobile" , callback=check_joy, tag='mob_checkbox')
 
         with dpg.collapsing_header(label="Buttons Control", indent=30):
             with dpg.group(horizontal=True, indent=150):
