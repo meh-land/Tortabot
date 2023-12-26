@@ -76,6 +76,9 @@ MENU_BAR_POS = (0,0)
 # GLOBALS 
 bag_process = ''
 
+DELAY_ARM_PUB = 0.1
+prev_pub_time = 0
+cur_pub_time = time.time()
 
 #  ROS
 # def get_counter(msg):
@@ -235,7 +238,7 @@ def base_joint_callback():
     global base_angle
     
     base_angle = int(dpg.get_value(item='base_angle'))
-    
+
     publish_arm()
 
 
@@ -243,15 +246,18 @@ def gripper_joint_callback():
     global  gripper_angle
 
     gripper_angle = int(dpg.get_value(item='gripper_angle'))
-    time.sleep(0.1)
+
     publish_arm()
 
 def publish_arm():
-    global base_angle, gripper_angle, pub_arm
+    global base_angle, gripper_angle, pub_arm, cur_pub_time, prev_pub_time
+
     arm_angles = [base_angle, gripper_angle]
-
-
-    pub_arm.publish(Int16MultiArray(data=arm_angles))
+    cur_pub_time = time.time()
+    if cur_pub_time - prev_pub_time > DELAY_ARM_PUB:
+        pub_arm.publish(Int16MultiArray(data=arm_angles))
+    
+    prev_pub_time = cur_pub_time
 
 
 
