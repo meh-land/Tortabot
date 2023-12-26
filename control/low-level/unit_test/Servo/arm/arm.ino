@@ -1,6 +1,6 @@
 
 #include <Servo.h>
-#define SERVO1 PA7 // A descriptive name for D6 pin of Arduino to provide PWM signal
+#define SERVO1 PA3 // A descriptive name for D6 pin of Arduino to provide PWM signal
 
 #define DAMPING 10
 

@@ -17,18 +17,30 @@
 #define HIP_LOW   0
 
 
-#define DAMPING     5
+#define DAMPING     10
 #define START_TIME 2000
 #define ROUTINE 1
 #define CALIBRATION_TIME 2000
 
+#define MAX_PUBLISHERS 10
+#define MAX_SUBSCRIBERS 10
+#define PUBLISHERS_BUFFER_SIZE 2048
+#define SUBSCRIBERS_BUFFER_SIZE 2048
+
+#define BAUD_RATE 115200
+
+ros::NodeHandle_<ArduinoHardware,
+                 MAX_PUBLISHERS,
+                 MAX_SUBSCRIBERS,                 
+                 PUBLISHERS_BUFFER_SIZE,           
+                 SUBSCRIBERS_BUFFER_SIZE>               
+                  nh;                             
 
 
 Servo base;  // Define an instance of of Servo with the name of "MG995_Servo"
 Servo gripper;  // Define an instance of of Servo with the name of "MG995_Servo"
 
 
-ros::NodeHandle nh;  // Initalizing the ROS node
 
 
 int arm_joints[] = {90, 90};
@@ -66,7 +78,10 @@ void setup()
 void loop() {
   nh.spinOnce();
 
+  damp_write(base, arm_state[0], arm_joints[0] );
   damp_write(gripper, arm_state[1], arm_joints[1] );
+  
+  arm_state[0] = arm_joints[0];
   arm_state[1] = arm_joints[1];
   delay(ROUTINE);
   
