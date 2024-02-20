@@ -1,12 +1,22 @@
 #include <Wire.h>
 #include <ros.h>
+#include <std_msgs/Float32.h>
 #include <geometry_msgs/Point.h>
+#define echo PA0
+#define trig PA1
+#define Sspeed 0.034
+float distance=0;
+float t =0;
+float capacity=0;
 int Gyro_X, Gyro_Y, Gyro_Z;
 geometry_msgs::Point Mpu_Values;
+std_msgs::Float32 dist;
 ros::NodeHandle nh;  // Initalizing the ROS node
 
 void setup () {
-
+  
+pinMode(echo,INPUT);
+pinMode(trig,OUTPUT);
 Serial.begin(57600);
 Wire.setClock (400000);
 Wire.begin();
@@ -63,11 +73,22 @@ Mpu_Values.y=Gyro_Y;
 Mpu_Values.z=Gyro_Z;
 ros::Publisher Mpu_pub("Mpu",&Mpu_Values);
 
+
 Serial.print("X = ");
 Serial.print (Gyro_X);
 Serial.print(" Y = ");
 Serial.print(Gyro_Y);
 Serial.print(" Z = ");
 Serial.println(Gyro_Z);
-delay(250);
+
+digitalWrite(trig,LOW);
+delayMicroseconds(2);
+digitalWrite(trig,HIGH);
+delayMicroseconds(10);
+digitalWrite(trig,LOW);
+t=pulseIn(echo,HIGH);
+distance = t*Sspeed/2;
+Serial.print(" Distance = ");
+Serial.println(distance);
+
 }
