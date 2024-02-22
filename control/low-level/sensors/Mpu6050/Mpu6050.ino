@@ -1,20 +1,16 @@
-
 #define __STM32F1__
+
+#include "Ultrasonic.h"
 #include <ros.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <geometry_msgs/Point.h>
-
 #include <Wire.h>
-#define echo PA1
-#define trig PA0
-#define Sspeed 0.034
-float distance=0;
-float t =0;
-float capacity=0;
+
 int Gyro_X, Gyro_Y, Gyro_Z;
 geometry_msgs::Point Mpu_Values;
-float dist[4]={0,0,0,0};
 std_msgs::Float32MultiArray dist_msg;
+
+float dist[4]={0,0,0,0};
 
 ros::NodeHandle nh;  // Initalizing the ROS node
 ros::Publisher Mpu_pub("Mpu",&Mpu_Values);
@@ -23,10 +19,8 @@ ros::Publisher dist_pub("Ultrasonics",&dist_msg);
 void setup () 
 {
 
+ultrasonic_init();
 
-  
-pinMode(echo,INPUT);
-pinMode(trig,OUTPUT);
 //Serial.begin(57600);
 Wire.setClock (400000);
 Wire.begin();
@@ -62,7 +56,8 @@ Wire.endTransmission();
 }
 
 void loop() {
-  nh.spinOnce();
+nh.spinOnce();
+/*
 Wire.beginTransmission (0x68);
 
 Wire.write(0x43);
@@ -90,29 +85,17 @@ Gyro_Z = Wire.read()<<8 | Wire.read(); //Shift high byte left and add low and hi
 Mpu_Values.x=Gyro_X;
 Mpu_Values.y=Gyro_Y;
 Mpu_Values.z=Gyro_Z;
+*/
 
-
-//Serial.print("X = ");
-//Serial.print (Gyro_X);
-//Serial.print(" Y = ");
-//Serial.print(Gyro_Y);
-//Serial.print(" Z = ");
-//Serial.println(Gyro_Z);
 Mpu_pub.publish(&Mpu_Values);
-digitalWrite(trig,LOW);
-delayMicroseconds(2);
-digitalWrite(trig,HIGH);
-delayMicroseconds(10);
-digitalWrite(trig,LOW);
-t=pulseIn(echo,HIGH);
-dist[0] = t*Sspeed/2;
+dist[0] = calc_distance_front();
+dist[1] = calc_distance_back();
+dist[2] = calc_distance_left();
+dist[3] = calc_distance_right();
 
-  dist_msg.data_length= 4;
-  dist_msg.data= dist;
+dist_msg.data_length= 4;
+dist_msg.data= dist;
 dist_pub.publish(&dist_msg);
-//Serial.print(" Distance = ");
-//Serial.println(distance);
-
 delay(100);
 
 }
