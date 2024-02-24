@@ -57,7 +57,7 @@ Wire.endTransmission();
 
 void loop() {
 nh.spinOnce();
-/*
+
 Wire.beginTransmission (0x68);
 
 Wire.write(0x43);
@@ -85,7 +85,7 @@ Gyro_Z = Wire.read()<<8 | Wire.read(); //Shift high byte left and add low and hi
 Mpu_Values.x=Gyro_X;
 Mpu_Values.y=Gyro_Y;
 Mpu_Values.z=Gyro_Z;
-*/
+
 
 Mpu_pub.publish(&Mpu_Values);
 dist[0] = calc_distance_front();

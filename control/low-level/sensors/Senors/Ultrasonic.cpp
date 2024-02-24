@@ -15,7 +15,8 @@ void ultrasonic_init()
 }
 float calc_distance_front()
 {
-
+  t=0;
+  delayMicroseconds(2000);
   digitalWrite(trig_front,LOW);
   delayMicroseconds(2);
   digitalWrite(trig_front,HIGH);
@@ -23,11 +24,13 @@ float calc_distance_front()
   digitalWrite(trig_front,LOW);
   t=pulseIn(echo_front,HIGH);
   float distance_front = t*Sspeed/2;
-  t=0;
   return distance_front;  
 }
+
 float calc_distance_back()
 {
+  t=0;
+  delayMicroseconds(2000);
   digitalWrite(trig_back,LOW);
   delayMicroseconds(2);
   digitalWrite(trig_back,HIGH);
@@ -35,11 +38,12 @@ float calc_distance_back()
   digitalWrite(trig_back,LOW);
   t=pulseIn(echo_back,HIGH);
   float distance_back = t*Sspeed/2;
-  t=0;
   return distance_back;
 }
 float calc_distance_left()
 {   
+  t=0;
+  delayMicroseconds(2000);
   digitalWrite(trig_left,LOW);
   delayMicroseconds(2);
   digitalWrite(trig_left,HIGH);
@@ -47,11 +51,12 @@ float calc_distance_left()
   digitalWrite(trig_left,LOW);
   t=pulseIn(echo_left,HIGH);
   float distance_left = t*Sspeed/2;
-  t=0;
   return distance_left;
 }
 float calc_distance_right()
 {  
+  t=0;
+  delayMicroseconds(2000);
   digitalWrite(trig_right,LOW);
   delayMicroseconds(2);
   digitalWrite(trig_right,HIGH);
@@ -59,6 +64,5 @@ float calc_distance_right()
   digitalWrite(trig_right,LOW);
   t=pulseIn(echo_right,HIGH);
   float distance_right = t*Sspeed/2;
-  t=0;
   return distance_right;
 }
