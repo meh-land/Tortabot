@@ -11,7 +11,8 @@
 #define trig_left PA4
 #define echo_right PA7
 #define trig_right PA6
-#define Sspeed 0.034
+#define Sspeed 0.034f
+#define timeout_ms 200000
 
 float calc_distance_front();
 float calc_distance_back();

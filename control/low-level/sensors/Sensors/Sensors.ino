@@ -8,7 +8,6 @@
 
 #include <I2Cdev.h>
 #include <MPU6050_6Axis_MotionApps20.h>
-int Gyro_X, Gyro_Y, Gyro_Z;
 geometry_msgs::Twist Mpu_Values;
 std_msgs::Float32MultiArray dist_msg;
 
@@ -26,16 +25,15 @@ uint8_t devStatus;      // return status after each device operation (0 = succes
 void setup () 
 {
 
-ultrasonic_init();
+ ultrasonic_init();
 
-//Serial.begin(57600);
 //Give the gyro time to start
   Wire.setSDA(PB11);
   Wire.setSCL(PB10);
   
   Wire.begin();
   Wire.setClock (400000);
-  delay (250);
+  ///delay (250);
 //Start serial port at 57600bps
 
 //Set the I2C clock speed to 400kHz
@@ -59,6 +57,7 @@ ultrasonic_init();
   nh.initNode();
   nh.advertise(Mpu_pub);
   nh.advertise(dist_pub);
+  delay(1000);
 }
 
   void loop() {

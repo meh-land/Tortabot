@@ -22,7 +22,7 @@ float calc_distance_front()
   digitalWrite(trig_front,HIGH);
   delayMicroseconds(10);
   digitalWrite(trig_front,LOW);
-  t=pulseIn(echo_front,HIGH);
+  t=pulseIn(echo_front,HIGH,timeout_ms);
   float distance_front = t*Sspeed/2;
   return distance_front;  
 }
@@ -36,8 +36,8 @@ float calc_distance_back()
   digitalWrite(trig_back,HIGH);
   delayMicroseconds(10);
   digitalWrite(trig_back,LOW);
-  t=pulseIn(echo_back,HIGH);
-  float distance_back = t*Sspeed/2;
+  t=pulseIn(echo_back,HIGH,timeout_ms);
+  float distance_back = t*Sspeed/2.0f;
   return distance_back;
 }
 float calc_distance_left()
@@ -49,8 +49,8 @@ float calc_distance_left()
   digitalWrite(trig_left,HIGH);
   delayMicroseconds(10);
   digitalWrite(trig_left,LOW);
-  t=pulseIn(echo_left,HIGH);
-  float distance_left = t*Sspeed/2;
+  t=pulseIn(echo_left,HIGH,timeout_ms);
+  float distance_left = t*Sspeed/2.0f;
   return distance_left;
 }
 float calc_distance_right()
@@ -62,7 +62,7 @@ float calc_distance_right()
   digitalWrite(trig_right,HIGH);
   delayMicroseconds(10);
   digitalWrite(trig_right,LOW);
-  t=pulseIn(echo_right,HIGH);
-  float distance_right = t*Sspeed/2;
+  t=pulseIn(echo_right,HIGH,timeout_ms);
+  float distance_right = t*Sspeed/2.0f;
   return distance_right;
 }
