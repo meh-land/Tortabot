@@ -73,7 +73,7 @@ ros::Publisher counts_pub("counts",&counts_msg);
 ros::Publisher pwm_pub("pwm",&pwm_msg);
 
 ros::Subscriber<std_msgs::Float32MultiArray> 
-wheel_vel_sub("cmd_vel",&callback_speeds);
+wheel_vel_sub("cmd_wheel",&callback_speeds);
 
 ros::Subscriber<std_msgs::Float32MultiArray> 
 pid_consts_sub("cmd_pid",&callback_pid);
