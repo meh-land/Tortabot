@@ -1,0 +1,16 @@
+<launch>
+
+    <node pkg="rosserial_python" type="serial_node.py" name="serial_node_0">
+      <param name="port" value="/dev/ttyACM0" />
+      <param name="name" value="stm1" />
+    </node>
+
+  
+    <node pkg="manual" type="website_control.py" name="website_control">
+    </node>
+    
+    <!-- Launch Dead_reckoning script-->
+    <node name="dead_reck" pkg="odom" type="dead_reckoning_script.py" output="screen">
+    </node>
+  
+  </launch>
