@@ -69,7 +69,7 @@ void setup ()
   {
     mpu.dmpGetQuaternion(&q, fifoBuffer);
     mpu.dmpGetEuler(euler, &q);
-    Mpu_Values.data =euler[2] * 180/M_PI;
+    Mpu_Values.data =euler[0] * 180/M_PI;
     Mpu_pub.publish(&Mpu_Values);
   }
 
