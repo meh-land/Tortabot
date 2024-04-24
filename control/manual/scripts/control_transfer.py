@@ -32,13 +32,14 @@ def vel2wheels(msg):
     arr.data = model_output
     # publish the model data to the robot
     angular_publisher.publish(arr)
+    print("Hsa")
 
 
 
 
 # initializing rospy nodes and topics' publisher
 rospy.init_node('robot_to_mecanum', anonymous=True)
-rospy.Subscriber('/cmd_vel', Twist, vel2wheels)
+rospy.Subscriber('/key_vel', Twist, vel2wheels)
 angular_publisher = rospy.Publisher('/wheel_vel', Float32MultiArray, queue_size=10)
 rate = rospy.Rate(10)  # 10 Hz
 

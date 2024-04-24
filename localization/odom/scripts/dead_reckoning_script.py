@@ -41,7 +41,7 @@ if __name__ == "__main__" :
     
     rospy.init_node("dead_reckoning")
     rospy.Subscriber("Espeeds", Float32MultiArray, speeds_of_wheels_callback)
-    rospy.Subscriber("/imu/yaw/deg", Float32, theta_callback)
+    rospy.Subscriber("Mpu", Float32, theta_callback)
     odom_pub = rospy.Publisher('odom', Odometry, queue_size=10)
     current_time = rospy.Time.now()
     last_time = rospy.Time.now()

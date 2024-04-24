@@ -32,7 +32,7 @@ Press ESC to turn off the program
 # initializing rospy nodes and topics' publisher
 rospy.init_node('keyboard_robot_control', anonymous=True)
 pub = rospy.Publisher('/key_vel', Twist, queue_size=10)
-# angular_publisher = rospy.Publisher('/wheel_vel', Float32MultiArray, queue_size=10)
+angular_publisher = rospy.Publisher('/wheel_vel', Float32MultiArray, queue_size=10)
 rate = rospy.Rate(10)  # 10 Hz
 
 # this array will be used to send the kinematic's model data to the robot STM
