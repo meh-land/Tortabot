@@ -1,0 +1,6 @@
+<launch>
+    <node name="stereo_driver" pkg="ball-selection" type="StereoCameraDriver.py" output="screen" />
+    <node ns="stereo" pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc" output="screen" />
+    <node pkg="tf" type="static_transform_publisher" name="camera_to_optical_tf" args="0 0 0 -1.570796 0 -1.570796 camera_link camera_optical_frame 10 "/>    
+    <node name="stereo_ros_driver" pkg="ball-selection" type="depth_test.py" output="screen" />
+</launch>
