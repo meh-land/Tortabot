@@ -26,3 +26,14 @@ rosrun torta_web_control vel_pub.py x y yaw
 - connect pi usb to stm usb
 
 - connect batteries to power jack
+
+
+### Arm setup
+
+- start rosserial
+
+- publish arm values
+
+- connect arm power
+
+
