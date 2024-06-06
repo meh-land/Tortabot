@@ -13,7 +13,7 @@ import tf
 rate_value = 200
 lx = 0.15 #0.22
 ly = 0.36 #0.158
-wheel_radius = 0.04 #0.075
+wheel_radius = 0.044444444444444444 #0.075
 speed_set = False
 
 

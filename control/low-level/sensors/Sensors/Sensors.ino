@@ -1,20 +1,22 @@
+
 #define __STM32F1__
 
 #include "Ultrasonic.h"
 #include <ros.h>
+#include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <geometry_msgs/Twist.h>
 #include <Wire.h>
 
 #include <I2Cdev.h>
 #include <MPU6050_6Axis_MotionApps20.h>
-geometry_msgs::Twist Mpu_Values;
+std_msgs::Float32 Mpu_Values;
 std_msgs::Float32MultiArray dist_msg;
 
 float dist[4]={0,0,0,0};
 
 ros::NodeHandle nh;  // Initalizing the ROS node
-ros::Publisher Mpu_pub("Mpu",&Mpu_Values);
+ros::Publisher Mpu_pub("/imu/yaw/deg",&Mpu_Values);
 ros::Publisher dist_pub("Ultrasonics",&dist_msg);
 float euler[3];         // [psi, theta, phi]    Euler angle container
 uint8_t fifoBuffer[64]; // FIFO storage buffer
@@ -67,12 +69,7 @@ void setup ()
   {
     mpu.dmpGetQuaternion(&q, fifoBuffer);
     mpu.dmpGetEuler(euler, &q);
-    Mpu_Values.linear.x=0;
-    Mpu_Values.linear.y=0;
-    Mpu_Values.linear.z=0;
-    Mpu_Values.angular.x=euler[0] * 180/M_PI;
-    Mpu_Values.angular.y=euler[1] * 180/M_PI;
-    Mpu_Values.angular.z=euler[2] * 180/M_PI;
+    Mpu_Values.data =euler[0] * 180/M_PI;
     Mpu_pub.publish(&Mpu_Values);
   }
 

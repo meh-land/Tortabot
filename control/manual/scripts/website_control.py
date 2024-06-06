@@ -12,7 +12,8 @@ import numpy as np
 
 # a set of strings of all currently-pressed keys
 WHEEL_RADIUS = 0.04    # 4cm
-ROBOT_BASELINE = 0.3+0.12   # 30+12cm
+lx = 0.3
+ly = 0.12   # 30+12cm
 
 
 # this array will be used to send the kinematic's model data to the robot STM
@@ -45,7 +46,7 @@ TURN_BIAS = 3000
 
 # initializing rospy nodes and topics' publisher
 rospy.init_node('website_robot_control', anonymous=True)
-angular_publisher = rospy.Publisher('/wheel_vel', Float32MultiArray, queue_size=10)
+angular_publisher = rospy.Publisher('/cmd_wheel', Float32MultiArray, queue_size=10)
 
 
 def twist_callback(msg):
@@ -59,10 +60,10 @@ def twist_callback(msg):
     angular_y = msg.angular.y
     angular_z = msg.angular.z
     
-    robot_vels = np.array([[linear_x, linear_y, angular_z]])
+    #robot_vels = np.array([[linear_x, linear_y, angular_z]])
 
     # Applying kinematic Model to produce velocities on each wheel
-    wheel_vels = Model.kinematicModel(R=WHEEL_RADIUS, b=ROBOT_BASELINE).mecanum4_wheels_inverse(robot_vels)
+    wheel_vels = Model.kinematicModel(linear_x, linear_y,angular_z,wheel_radius=WHEEL_RADIUS, ly=ly,lx=lx).mecanum_4_vel()
 
     # publish the results to see speeds
     arr.data = wheel_vels
