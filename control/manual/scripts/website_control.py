@@ -46,7 +46,7 @@ TURN_BIAS = 3000
 
 # initializing rospy nodes and topics' publisher
 rospy.init_node('website_robot_control', anonymous=True)
-angular_publisher = rospy.Publisher('/cmd_wheel', Float32MultiArray, queue_size=10)
+angular_publisher = rospy.Publisher('/wheel_vel', Float32MultiArray, queue_size=10)
 
 
 def twist_callback(msg):
