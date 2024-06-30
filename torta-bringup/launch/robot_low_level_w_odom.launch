@@ -24,4 +24,6 @@
     <node name="dead_reck" pkg="odom" type="dead_reckoning_script.py" output="screen">
     </node>
   
+    <node name="prev_crash" pkg="torta_web_control" type="prev_crash.py" output="screen">
+    </node>
   </launch>
